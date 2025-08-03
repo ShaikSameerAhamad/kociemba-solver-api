@@ -1,17 +1,25 @@
 from flask import Flask, request, jsonify
-import kociemba
+from kociemba import solve
 
 app = Flask(__name__)
 
-@app.route('/solve', methods=['POST'])
+# ✅ Health check route (homepage)
+@app.route("/")
+def home():
+    return "✅ Kociemba Solver API is running."
+
+# ✅ API endpoint to solve cube
+@app.route("/solve", methods=["POST"])
 def solve_cube():
     data = request.get_json()
-    facelets = data.get('facelets', '')
+    if not data or "input" not in data:
+        return jsonify({"error": "Missing 'input' in request body"}), 400
     try:
-        solution = kociemba.solve(facelets)
-        return jsonify({'solution': solution})
+        solution = solve(data["input"])
+        return jsonify({"solution": solution})
     except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run()
+# ✅ Local development
+if __name__ == "__main__":
+    app.run(debug=True)
